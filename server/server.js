@@ -4,10 +4,10 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const app = express();
-const healthRoute = require('./routes/health.js');
+const healthRouter = require('./routes/health.js');
 const notesRouter = require('./routes/notes.js');
 const tenantsRouter = require('./routes/tenants.js');
-const {userAuth} = require('./middleware.js');
+const {userAuth, verifyRole} = require('./middleware.js');
 
 app.use(cors({
     origin: '*'
@@ -17,8 +17,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(userAuth);
 
-app.use('/tenants', tenantsRouter);
-app.use('/notes', tenantsRouter);
-app.use('/health', tenantsRouter);
+app.use('/tenants', verifyRole("admin"), tenantsRouter);
+app.use('/notes', verifyRole("member"), notesRouter);
+app.use('/health', healthRouter);
 
 app.listen(process.env.PORT, ()=>{console.log("listening at ", process.env.PORT)});
