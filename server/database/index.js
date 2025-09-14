@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
-const Tenant = require('./tenants');
+const Tenant = require('./tenants.js');
+const noteSchema = require('./notes.js');
+// const Notes = require('./notes.js');
+const userSchema = require('./users.js');
+// const Users = require('./users.js');
 const { DBError } = require('../utils');
 
 const tenantConnections = {};
@@ -22,6 +26,9 @@ async function getTenantDbConnection(slug) {
             useUnifiedTopology: true
         });
 
+        conn.model('user', userSchema);
+        conn.model('note', noteSchema);
+
         tenantConnections[slug] = conn;
         return conn;
 
@@ -29,7 +36,13 @@ async function getTenantDbConnection(slug) {
 
         if(err instanceof DBError){
             console.error("model: ", err.model," message: ", err.message);
+            throw err;
         }
     }
 
+}
+
+module.exports = {
+    Tenant,
+    getTenantDbConnection
 }

@@ -12,4 +12,5 @@ const noteSchema = new mongoose.Schema({
 	}
 });
 
-module.exports = (connection) => connection.model('note', noteSchema);
+// module.exports = (connection) => connection.model('note', noteSchema);
+module.exports = noteSchema;
