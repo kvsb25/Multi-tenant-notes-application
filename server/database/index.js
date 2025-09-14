@@ -16,19 +16,20 @@ async function main() {
 
 async function getTenantDbConnection(slug) {
     try {
+        // console.log("tenantConnections: ", tenantConnections[slug].name);
 
         if (tenantConnections[slug]) return tenantConnections[slug];
 
-        const tenant = await Tenant.find({ slug });
+        const tenant = await Tenant.findOne({ slug });
         if (!tenant) throw new DBError("tenant", "tenant not found");
+        console.log("tenant from DB: ", tenant);
 
-        const conn = mongoose.createConnection(tenant.dbUri, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true
-        });
+        const conn = await mongoose.createConnection(tenant.dbUri).asPromise();
 
         conn.model('user', userSchema);
         conn.model('note', noteSchema);
+
+        console.log("in index.js db", conn.name, "\n", "in index.js db db models", Object.keys(conn.models));
 
         tenantConnections[slug] = conn;
         return conn;

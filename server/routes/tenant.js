@@ -8,6 +8,7 @@ router.route('/:slug/upgrade')
         try {
 
             const { slug } = req.params;
+            console.log("slug: ", slug);
             const update = await Tenant.findOneAndUpdate({ slug }, { plan: "pro" });
 
             if (!update) {

@@ -20,7 +20,7 @@ const tenantSchema = new mongoose.Schema({
 		enum: ['free', 'pro'],
 		default: 'free'
 	}
-})
+});
 
 tenantSchema.pre('save', function(next) {
     if (!this.slug && this.name) {

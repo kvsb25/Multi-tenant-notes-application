@@ -2,22 +2,29 @@ require('dotenv').config();
 // console.log(process.env);
 const express = require('express');
 const cors = require('cors');
-const cookieParser = require('cookie-parser');
+// const cookieParser = require('cookie-parser');
 const app = express();
 const healthRouter = require('./routes/health.js');
 const notesRouter = require('./routes/notes.js');
 const tenantsRouter = require('./routes/tenant.js');
 const authRouter = require('./routes/auth.js');
 const { userAuth, verifyRole, setTenantDbConnection } = require('./middleware.js');
-const APIError = require('./utils/APIError.js');
+const {APIError, DBError} = require('./utils');
 
 app.use(cors({
     origin: '*'
 }));
-app.use(cookieParser(process.env.COOKIE_SECRET));
+// app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/', authRouter);
+
+app.use((req, res, next) => {
+    console.log(`🔍 REQUEST: ${req.method} ${req.path}`);
+    next();
+});
+
+app.use('/health', healthRouter);
+app.use('/auth', authRouter);
 
 app.use(userAuth);
 app.use(setTenantDbConnection);
@@ -36,7 +43,10 @@ app.use('/notes',
     notesRouter
 );
 
-app.use('/health', healthRouter);
+app.use('/', (req, res, next)=>{
+    const err = new APIError(404, "NOT FOUND");
+    next(err);
+})
 
 app.use((err, req, res, next) => {
 
@@ -49,7 +59,7 @@ app.use((err, req, res, next) => {
 
         console.error("DBError: model: ", err.model, " message: ", err.message);
     }
-
+    console.error(err);
     return res.status(500).send("Internal server error");
 })
 
