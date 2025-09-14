@@ -1,4 +1,4 @@
-require('dotenv').config()
+require('dotenv').config();
 // console.log(process.env);
 const express = require('express');
 const cors = require('cors');
@@ -8,7 +8,7 @@ const healthRouter = require('./routes/health.js');
 const notesRouter = require('./routes/notes.js');
 const tenantsRouter = require('./routes/tenant.js');
 const authRouter = require('./routes/auth.js');
-const { userAuth, verifyRole } = require('./middleware.js');
+const { userAuth, verifyRole, setTenantDbConnection } = require('./middleware.js');
 const APIError = require('./utils/APIError.js');
 
 app.use(cors({
@@ -17,11 +17,25 @@ app.use(cors({
 app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(userAuth);
-
 app.use('/', authRouter);
-app.use('/tenants', verifyRole("admin"), tenantsRouter);
-app.use('/notes', verifyRole("member"), notesRouter);
+
+app.use(userAuth);
+app.use(setTenantDbConnection);
+
+app.use('/tenants',
+    verifyRole("admin"),
+    tenantsRouter
+);
+
+app.use('/notes',
+    verifyRole("member"),
+    async (req, res, next) => {
+        req.model = req.db.model('note');
+        next();
+    },
+    notesRouter
+);
+
 app.use('/health', healthRouter);
 
 app.use((err, req, res, next) => {

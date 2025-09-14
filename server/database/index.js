@@ -11,6 +11,7 @@ const tenantConnections = {};
 main().catch(err => console.log(err));
 async function main() {
     await mongoose.connect(process.env.MONGO_DB_URL);
+    console.log('db connected');
 }
 
 async function getTenantDbConnection(slug) {
