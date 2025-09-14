@@ -33,11 +33,8 @@ async function getTenantDbConnection(slug) {
         return conn;
 
     } catch (err) {
-
-        if(err instanceof DBError){
-            console.error("model: ", err.model," message: ", err.message);
-            throw err;
-        }
+        
+        throw err;
     }
 
 }
