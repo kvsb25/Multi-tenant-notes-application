@@ -8,10 +8,26 @@ const { DBError } = require('../utils');
 
 const tenantConnections = {};
 
-main().catch(err => console.log(err));
-async function main() {
-    await mongoose.connect(process.env.MONGO_DB_URL);
-    console.log('db connected');
+// main().catch(err => console.log(err));
+// async function main() {
+//     await mongoose.connect(process.env.MONGO_DB_URL);
+//     console.log('db connected');
+// }
+
+let isConnected = false;
+
+async function connectToDatabase() {
+    if (isConnected) {
+        return mongoose.connection;
+    }
+
+    const conn = await mongoose.connect(process.env.MONGO_DB_URL, {
+        serverSelectionTimeoutMS: 5000,
+    });
+
+    isConnected = conn.connections[0].readyState === 1;
+    console.log("✅ MongoDB connected");
+    return conn;
 }
 
 async function getTenantDbConnection(slug) {
@@ -35,7 +51,7 @@ async function getTenantDbConnection(slug) {
         return conn;
 
     } catch (err) {
-        
+
         throw err;
     }
 
@@ -43,5 +59,6 @@ async function getTenantDbConnection(slug) {
 
 module.exports = {
     Tenant,
-    getTenantDbConnection
+    getTenantDbConnection,
+    connectToDatabase
 }

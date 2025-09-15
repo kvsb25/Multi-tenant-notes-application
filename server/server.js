@@ -10,6 +10,7 @@ const tenantsRouter = require('./routes/tenant.js');
 const authRouter = require('./routes/auth.js');
 const { userAuth, verifyRole, setTenantDbConnection } = require('./middleware.js');
 const {APIError, DBError} = require('./utils');
+const {connectToDatabase} = require('./database');
 
 app.use(cors({
     origin: '*'
@@ -18,14 +19,32 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+let dbPromise = null;
+async function ensureDbConnection() {
+  if (!dbPromise) {
+    dbPromise = connectToDatabase();  // returns a promise
+  }
+  return dbPromise;
+}
+
+async function dbMiddleware(req, res, next){
+    try{
+        await ensureDbConnection();
+        next();
+    } catch (err) {
+
+    }
+}
+
 app.use((req, res, next) => {
     console.log(`🔍 REQUEST: ${req.method} ${req.path}`);
     next();
 });
 
-app.use('/', (req, res)=>{
-    return res.status.send("working fine")
-})
+// app.use('/', (req, res)=>{
+//     return res.status.send("working fine")
+// })
+
 app.use('/health', healthRouter);
 app.use('/auth', authRouter);
 
