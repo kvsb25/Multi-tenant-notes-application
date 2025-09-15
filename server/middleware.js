@@ -18,6 +18,7 @@ const userAuth = (req, res, next) => {
                 if(err){
                     throw new APIError(401, "UNAUTHORIZED, Please login");
                 }
+
                 req.user = user;
                 console.log("in userAuth req.user: ", req.user);
                 console.log("authorized successfully");
@@ -79,7 +80,7 @@ const validateSubscription = async (req, res, next) => {
         console.log("in validateSubscription plan: ", plan);
 
         const num = await req.db.model('note').countDocuments({});
-        
+
         if (plan != 'pro' && num >= 3) {
             return res.status(403).send("Free Plan limit reached. Upgrade to Pro to create more notes");
         }

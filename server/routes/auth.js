@@ -2,7 +2,7 @@ const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { Tenant, getTenantDbConnection } = require('../database');
-const { APIError } = require('../utils');
+const { APIError, joi } = require('../utils');
 
 router.route('/signup')
     .get((req, res) => {
@@ -12,11 +12,12 @@ router.route('/signup')
 
         try {
 
-            let { email, password, tenant, role } = req.body;
+            const {error/*, value*/} = joi.loginSchema.validate(req.body);
+            if(error){
+                throw new APIError(400, "Bad Request");
+            } 
 
-            if (!email) {
-                throw new APIError(400, "No Email sent");
-            }
+            let { email, password, tenant, role } = req.body;
 
             if (!tenant) {
                 tenant = email.split('@')[1].split(".")[0];
@@ -76,11 +77,12 @@ router.route('/login')
 
         try {
 
-            let { email, password, tenant, role } = req.body;
-
-            if (!email) {
-                throw new APIError(400, "No Email sent");
+            const {error/*, value*/} = joi.loginSchema.validate(req.body);
+            if(error){
+                throw new APIError(400, "Bad Request");
             }
+
+            let { email, password, tenant, role } = req.body;
 
             if (!tenant) {
                 tenant = email.split('@')[1].split(".")[0];

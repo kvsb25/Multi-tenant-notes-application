@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { validateSubscription } = require('../middleware');
-const { APIError, DBError } = require('../utils');
+const { APIError, DBError, joi } = require('../utils');
 
 router.route('/')
     .get(async (req, res) => {
@@ -15,6 +15,9 @@ router.route('/')
         return res.status(200).send(notes);
     })
     .post(validateSubscription, async (req, res) => {
+
+        const {error} = joi.noteCreateSchema.validate(req.body);
+        if(error) throw new APIError(400, "Bad request");
 
         const { title, content } = req.body
 
@@ -36,7 +39,7 @@ router.route('/:id')
             if(!note){
                 throw new APIError(404, "Note not found. It has been deleted or was never created");
             }
-            
+
             return res.status(200).send(note);
 
         } catch (err) {
@@ -47,6 +50,10 @@ router.route('/:id')
         try{
 
             const {id} = req.params;
+
+            const {error} = joi.noteUpdateSchema.validate(req.body);
+            if(error) throw new APIError(400, "Bad request");
+
             const {title, content} = req.body;
 
             const update = {}
