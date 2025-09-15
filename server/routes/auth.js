@@ -12,9 +12,10 @@ router.route('/signup')
 
         try {
 
-            const {error/*, value*/} = joi.loginSchema.validate(req.body);
+            const {error, value} = joi.loginSchema.validate(req.body);
+            console.log(req.body);
             if(error){
-                throw new APIError(400, "Bad Request");
+                throw new APIError(400, `Bad Request ${error.details[0].message}`);
             } 
 
             let { email, password, tenant, role } = req.body;
@@ -99,6 +100,7 @@ router.route('/login')
             }
 
             if (await bcrypt.compare(password, foundUser.password)) {
+            // if (password == foundUser.password) {
 
                 const payload = {
                     _id: foundUser._id.toString(),
