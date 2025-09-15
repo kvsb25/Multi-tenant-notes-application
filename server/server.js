@@ -63,4 +63,5 @@ app.use((err, req, res, next) => {
     return res.status(500).send("Internal server error");
 })
 
-app.listen(process.env.PORT, () => { console.log("listening at ", process.env.PORT) });
+// app.listen(process.env.PORT, () => { console.log("listening at ", process.env.PORT) });
+module.exports = app;
