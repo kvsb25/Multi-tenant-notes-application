@@ -23,6 +23,9 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use('/', (req, res)=>{
+    return res.status.send("working fine")
+})
 app.use('/health', healthRouter);
 app.use('/auth', authRouter);
 
