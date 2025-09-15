@@ -77,7 +77,9 @@ const validateSubscription = async (req, res, next) => {
         const { tenant } = req.user;
         const {plan} = await Tenant.findOne({ slug: tenant.trim().toLowerCase() }).select('plan -_id');
         console.log("in validateSubscription plan: ", plan);
+
         const num = await req.db.model('note').countDocuments({});
+        
         if (plan != 'pro' && num >= 3) {
             return res.status(403).send("Free Plan limit reached. Upgrade to Pro to create more notes");
         }

@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { validateSubscription } = require('../middleware');
-const { APIError } = require('../utils');
+const { APIError, DBError } = require('../utils');
 
 router.route('/')
     .get(async (req, res) => {
@@ -22,7 +22,7 @@ router.route('/')
         const newNote = new req.model({ title, content });
         await newNote.save();
 
-        return res.status(200).send(newNote);
+        return res.status(201).send(newNote);
     })
 
 router.route('/:id')
@@ -31,11 +31,12 @@ router.route('/:id')
 
             const { id } = req.params;
             const note = await req.db.model('note').findById(id);
+            console.log("in notes.js; note: ",note);
 
-            if (Array.from(note).length == 0) {
-                return res.sendStatus(204);
+            if(!note){
+                throw new APIError(404, "Note not found. It has been deleted or was never created");
             }
-
+            
             return res.status(200).send(note);
 
         } catch (err) {
@@ -54,12 +55,26 @@ router.route('/:id')
             if(content) update["content"] = content;
             update["updatedAt"] = Date.now();
 
-            const newNote = await req.model.findByIdAndUpdate(id, update);
+            const newNote = await req.model.findByIdAndUpdate(id, update, {new:true});
+
+            if(!newNote) throw new DBError("notes", "note not updated");
 
             res.status(200).send(newNote);
 
         } catch (err) {
+
             throw err;
+        }
+    })
+    .delete(async (req, res)=>{
+        try{
+
+            const {id} = req.params;
+            
+            await req.model.findByIdAndDelete(id);
+
+        } catch (err) {
+            throw err
         }
     })
 

@@ -15,7 +15,7 @@ router.route('/:slug/upgrade')
                 throw new DBError("tenant", "plan update unsuccessfull");
             }
 
-            res.sendStatus(200);
+            res.status(200).send("Upgraded to pro");
 
         } catch (err) {
 
